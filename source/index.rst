@@ -1,0 +1,20 @@
+.. Coding with kids documentation master file, created by
+   sphinx-quickstart on Wed Feb 28 14:27:21 2024.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to Coding with kids's documentation!
+============================================
+
+Hello World
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Options:
+
+   Options/justlogic
+   Options/justcode
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Guidlines:
