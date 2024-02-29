@@ -50,19 +50,35 @@ Có 2 hai cách khởi động một luồng (thread) trong Zephyr:
 Zephyr cho phép hủy bỏ việc trì hoãn khởi động của một luồng trước khi nó bắt đầu chạy. Yêu cầu hủy bỏ chỉ có hiệu lực nếu luồng chưa bắt đầu thực thi.
 
 
-Thread Termination (Chuaw xong)
----------------------------------
+Thread Termination
+---------------------------
 Thông thường, sau khi được khởi động, một luồng sẽ tiếp tục chạy mãi mãi. Tuy nhiên, luồng có thể kết thúc thực thi theo cách *kết thúc đồng bộ (synchronous termination)*. Lúc này luồng trả về từ hàm điểm vào (entry point function), sau đó luồng giải phóng các tài nguyên nó đang sử dụng và biến mất khỏi hệ thống. Đây gọi là **termination**.
 
 Khi luồng kết thúc, nó có trách nhiệm giải phóng mọi tài nguyên được chia sẻ mà nó sở hữu (chẳng hạn như các mutex và bộ nhớ được cấp phát động), vì kernel không tự động lấy lại chúng. 
 
 Trong một số trường hợp, một luồng có thể sleep cho đến khi một luồng khác kết thúc. Điều này có thể được thực hiện bằng API ``k_thread_join()``.  
 
+Khi một luồng đã kết thúc, kernel đảm bảo rằng cấu trúc luồng sẽ không được sử dụng. Bộ nhớ của cấu trúc như vậy sau đó có thể được sử dụng lại cho bất kỳ mục đích nào, bao gồm cả việc tạo ra một luồng mới. 
+
+.. note::
+    Lưu ý rằng luồng phải được kết thúc hoàn toàn, điều này thể hiện các **race condition** trong đó việc hoàn thành tín hiệu logic của chính luồng đó được một luồng khác nhìn thấy trước khi quá trình xử lý kernel hoàn tất. *Tức là chưa xóa xong luồng này thì luồng kia đã truy cập vào*.
+
+    - **Race condition**:
+
+     - Luồng cần chấm dứt hoàn thành logic của nó và thông báo hoàn thành. 
+     - Luồng chờ đợi thấy tín hiệu này và tiếp tục thực thi.
+     - Nhưng thực tế, hệ điều hành chưa hoàn tất việc dọn dẹp luồng mục tiêu. 
+     - Điều này có thể dẫn đến truy cập tài nguyên không hợp lý hoặc hành vi không mong muốn trong luồng chờ đợi. 
+
+
+Trong trường hợp thông thường, ưu tiên sử dụng các API ``k_thread_join()`` hoặc ``k_thread_abort()`` thay vì dựa vào tín hiệu trong logic ứng dụng để đồng bộ hóa các luồng. 
+
+
 Thread Aborting
 ---------------------
 Một luồng có thể kết thúc quá trình thực thi của nó bằng cách hủy bỏ. Kernel tự động hủy bỏ nếu luồng đó gặp tình trạng lỗi nghiêm trọng, chẳng hạn như **Dereferencing a null pointer**.
 
-- Dereferencing a null pointer là hành động truy cập giá trị tại địa chỉ bộ nhớ và được trỏ bởi một con trỏ null. Con trỏ null là một con trỏ không trỏ đến bất kỳ địa chỉ bộ nhớ nào hợp lệ. 
+- **Dereferencing a null pointer** là hành động truy cập giá trị tại địa chỉ bộ nhớ và được trỏ bởi một con trỏ null. Con trỏ null là một con trỏ không trỏ đến bất kỳ địa chỉ bộ nhớ nào hợp lệ. 
 
 Một luồng cũng có thể bị hủy bỏ bởi một luồng khác (hoặc bởi chính nó) bằng cách gọi ``k_thread_abort()``. Điều này khiến luồng dừng ngay lập tức bất kể trạng thái hiện tại và bất kỳ công việc đang thực hiện nào. Tuy nhiên, sử dụng ``k_thread_abort()`` nên cẩn thận vì nó có thể dẫn đến hành vi không mong muốn nếu luồng đã thực hiện một số tác vụ nhất định, như đang giữ tài nguyên hoặc đang ở giữa hoạt động quan trọng. Thay vì hủy luồng đột ngột, khuyến khích sử dụng tín hiệu để yêu cầu luồng tự kết thúc theo cách hợp lý. Điều này cho phép luồng dọn dẹp tài nguyên, hoàn thành các tác vụ đang dang dở và chấm dứt một cách sạch sẽ.
 
@@ -86,13 +102,14 @@ Một luồng có một hoặc nhiều yếu tố ngăn cản việc thực thi 
 Các yếu tố sau làm cho luồng chưa sẵn sàng: 
 
 - Luồng chưa được bắt đầu.
-- Thread đang chờ kernel thưc hiện xong một hoạt động. 
-
- - Khi một luồng yêu cầu sử dụng một kernel object (ví dụ như lấy một semaphore), nhưng đối tượng đó chưa sẵn sàng (ví dụ như semaphore đã được chiếm bởi một luồng khác), luồng sẽ bị chặn và chờ đợi cho đến khi thao tác trên đối tượng hoàn thành.
+- Thread đang chờ kernel thưc hiện xong một hoạt động. Khi một luồng yêu cầu sử dụng một kernel object (ví dụ như lấy một semaphore), nhưng đối tượng đó chưa sẵn sàng (ví dụ như semaphore đã được chiếm bởi một luồng khác), luồng sẽ bị chặn và chờ đợi cho đến khi thao tác trên đối tượng hoàn thành.
 
 - Luồng đang chờ thời gian để thực thi (hết thời gian chờ). 
 - Luồng bị chặn (suspended).
 - Luồng bị chấm dứt (terminated) hoặc hủy bỏ (aborted).
+
+.. image:: img/Thread_States.svg
+    :align: center
 
 .. note:: 
     Sơ đồ có thể khiến bạn nghĩ ``ready`` và ``run`` là hai trạng thái luồng riêng biệt. Thực ra ``ready`` là một trạng thái thực sự của luồng, cho biết nó đã được kích hoạt và đủ điều kiện để chạy. ``Run`` không phải là trạng thái luồng, mà là **trạng thái lịch trình**. Trạng thái lịch trình cho biết liệu một luồng có đang được hệ thống thực thi hay không.
@@ -161,5 +178,8 @@ Kernel hỗ trợ số lượng mức ưu tiên gần như không giới hạn. 
 
 - Cooperative threads: (- ``CONFIG_NUM_COOP_PRIORITIES``) to -1
 - Preemptive threads: 0 to (``CONFIG_NUM_PREEMPT_PRIORITIES`` - 1) 
+
+.. image:: img/Priorities.svg
+    :align: center
 
 Ví dụ: cấu hình 5 mức độ ưu tiên cho cooperative và 10 mức độ ưu tiên preemptive sẽ có kết quả lần lượt là trong phạm vi từ -5 đến -1 và 0 đến 9. 
