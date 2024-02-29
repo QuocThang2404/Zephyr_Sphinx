@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thread &mdash; Zephyr_Sphinx v1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=e160b93e"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Test" href="../../Modbus/index.html" />
+    <link rel="prev" title="HOME" href="../../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Zephyr_Sphinx
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Thread</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lifecylce">Lifecylce</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#thread-creation">Thread Creation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#thread-termination-chuaw-xong">Thread Termination (Chuaw xong)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#thread-aborting">Thread Aborting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#thread-suspension">Thread Suspension</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#thread-state">Thread State</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../Modbus/index.html">Test</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Zephyr_Sphinx</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Thread</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/Kernel/Thread/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="thread">
+<h1>Thread<a class="headerlink" href="#thread" title="Link to this heading"></a></h1>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#overview" id="id1">Overview</a></p></li>
+<li><p><a class="reference internal" href="#lifecylce" id="id2">Lifecylce</a></p>
+<ul>
+<li><p><a class="reference internal" href="#thread-creation" id="id3">Thread Creation</a></p></li>
+<li><p><a class="reference internal" href="#thread-termination-chuaw-xong" id="id4">Thread Termination (Chuaw xong)</a></p></li>
+<li><p><a class="reference internal" href="#thread-aborting" id="id5">Thread Aborting</a></p></li>
+<li><p><a class="reference internal" href="#thread-suspension" id="id6">Thread Suspension</a></p></li>
+<li><p><a class="reference internal" href="#thread-state" id="id7">Thread State</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="overview">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Kernel Services:</strong> Zephyr cung cấp các chức năng để quản lý luồng, bao gồm tạo, lập lịch và xóa.</p></li>
+<li><p><strong>Thread:</strong> Là một đối tượng trong kernel được sử dụng để xử lý các tác vụ ứng dụng phức tạp hoặc mất nhiều thời gian, vượt quá khả năng của bộ xử lý ngắt (ISR).</p></li>
+<li><p><strong>Số lượng thread:</strong> Ứng dụng có thể tạo ra bất kỳ số lượng thread nào, chỉ giới hạn bởi dung lượng RAM khả dụng.</p></li>
+<li><p><strong>Mã định danh thread:</strong> Mỗi thread được gán một mã định danh duy nhất khi được tạo, giúp tham chiếu và quản lý dễ dàng.</p></li>
+</ul>
+<p><strong>Một thread có các thuộc tính chính sau:</strong></p>
+<ul class="simple">
+<li><p><strong>Stack area</strong> là vùng bộ nhớ được sử dụng cho stack của thread. Kích thước của vùng stack có thể được điều chỉnh theo nhu cầu thực tế của thread. Zephyr cung cấp các macro đặc biệt để tạo và làm việc với vùng stack này.</p></li>
+<li><p><strong>Thread control block</strong> là một khối dữ liệu trong kernel chứa các thông tin nội bộ (metadata) về một luồng cụ thể. Mỗi luồng trong Zephyr đều có một TCB duy nhất. TCB trong Zephyr được định nghĩa như một kiểu dữ liệu có tên <code class="docutils literal notranslate"><span class="pre">k_thread</span></code>. Kiểu dữ liệu này cung cấp cấu trúc và các biến cần thiết để theo dõi trạng thái của luồng, như vị trí ngăn xếp, trạng thái chạy/dừng, thông tin ưu tiên, v.v.</p></li>
+<li><p><strong>Entry point function</strong> là hàm khởi động khi luồng bắt đầu chạy. Có thể nhận tối đa 3 giá trị đối số truyền vào. Hàm này chịu trách nhiệm thực hiện các tác vụ của luồng, cấu trúc và nội dung của hàm phụ thuộc vào yêu cầu của từng ứng dụng.</p></li>
+<li><p><strong>Scheduling priority</strong> hay còn gọi là mức ưu tiên lập lịch được sử dụng để hướng dẫn bộ lập lịch của kernel cách phân bổ thời gian CPU cho luồng.</p></li>
+<li><p><strong>Thread options</strong> cho phép luồng nhận được sự xử lý đặc biệt của kernel trong các trường hợp cụ thể  giúp nâng cao khả năng kiểm soát và linh hoạt của luồng.</p></li>
+<li><p><strong>Start delay</strong>: chỉ định khoảng thời gian kernel phải đợi trước khi bắt đầu luồng.</p></li>
+<li><p><strong>Execution mode</strong> có 2 chế độ: supervisor và user. Ở chế độ user thì bị hạn chế một số đặc quyền. Mức độ hạn chế tùy thuộc vào tùy chọn <code class="docutils literal notranslate"><span class="pre">CONFIG_USERSPACE</span></code>. Chế độ này giúp tăng cường bảo mật và độ ổn định, vì lỗi trong luồng ít ảnh hưởng đến toàn hệ thống. Chế độ supervisor là chế độ mặc định của luồng và cho phép luồng truy cập tất cả quyền hạn:</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>Các lệnh CPU đặc quyền (ví dụ: tắt/bật ngắt).</p></li>
+<li><p>Toàn bộ không gian địa chỉ nhớ.</p></li>
+<li><p>Các thiết bị ngoại vi (peripherals).</p></li>
+<li><p>Do quyền hạn cao, chế độ này tiềm ẩn rủi ro cao nếu xảy ra lỗi trong luồng.</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="lifecylce">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Lifecylce</a><a class="headerlink" href="#lifecylce" title="Link to this heading"></a></h2>
+<section id="thread-creation">
+<h3><a class="toc-backref" href="#id3" role="doc-backlink">Thread Creation</a><a class="headerlink" href="#thread-creation" title="Link to this heading"></a></h3>
+<p>Một thread phải được tạo trước khi sử dụng. Kernel sẽ khởi tạo khối điều khiển luồng (TCB) và phần này là mỏ đầu của thread’s stack. Phần còn lại của thread’s stack thường chưa được khởi tạo.
+Có 2 hai cách khởi động một luồng (thread) trong Zephyr:</p>
+<ul class="simple">
+<li><p>Khi xác định <strong>start delay</strong> là <code class="docutils literal notranslate"><span class="pre">K_NO_WAIT</span></code>, kernel sẽ bắt đầu thực thi luồng ngay lập tức.</p></li>
+<li><p>Có thể yêu cầu kernel trì hoãn thực thi luồng trong một khoảng thời gian nhất định. Điều này được thực hiện bằng cách xác định một giá trị thời gian chờ cho <strong>start delay</strong>.</p></li>
+</ul>
+<p>Zephyr cho phép hủy bỏ việc trì hoãn khởi động của một luồng trước khi nó bắt đầu chạy. Yêu cầu hủy bỏ chỉ có hiệu lực nếu luồng chưa bắt đầu thực thi.</p>
+</section>
+<section id="thread-termination-chuaw-xong">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">Thread Termination (Chuaw xong)</a><a class="headerlink" href="#thread-termination-chuaw-xong" title="Link to this heading"></a></h3>
+<p>Thông thường, sau khi được khởi động, một luồng sẽ tiếp tục chạy mãi mãi. Tuy nhiên, luồng có thể kết thúc thực thi theo cách <em>kết thúc đồng bộ (synchronous termination)</em>. Lúc này luồng trả về từ hàm điểm vào (entry point function), sau đó luồng giải phóng các tài nguyên nó đang sử dụng và biến mất khỏi hệ thống. Đây gọi là <strong>termination</strong>.</p>
+<p>Khi luồng kết thúc, nó có trách nhiệm giải phóng mọi tài nguyên được chia sẻ mà nó sở hữu (chẳng hạn như các mutex và bộ nhớ được cấp phát động), vì kernel không tự động lấy lại chúng.</p>
+<p>Trong một số trường hợp, một luồng có thể sleep cho đến khi một luồng khác kết thúc. Điều này có thể được thực hiện bằng API <code class="docutils literal notranslate"><span class="pre">k_thread_join()</span></code>.</p>
+</section>
+<section id="thread-aborting">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">Thread Aborting</a><a class="headerlink" href="#thread-aborting" title="Link to this heading"></a></h3>
+<p>Một luồng có thể kết thúc quá trình thực thi của nó bằng cách hủy bỏ. Kernel tự động hủy bỏ nếu luồng đó gặp tình trạng lỗi nghiêm trọng, chẳng hạn như <strong>Dereferencing a null pointer</strong>.</p>
+<ul class="simple">
+<li><p>Dereferencing a null pointer là hành động truy cập giá trị tại địa chỉ bộ nhớ và được trỏ bởi một con trỏ null. Con trỏ null là một con trỏ không trỏ đến bất kỳ địa chỉ bộ nhớ nào hợp lệ.</p></li>
+</ul>
+<p>Một luồng cũng có thể bị hủy bỏ bởi một luồng khác (hoặc bởi chính nó) bằng cách gọi <code class="docutils literal notranslate"><span class="pre">k_thread_abort()</span></code>. Điều này khiến luồng dừng ngay lập tức bất kể trạng thái hiện tại và bất kỳ công việc đang thực hiện nào. Tuy nhiên, sử dụng <code class="docutils literal notranslate"><span class="pre">k_thread_abort()</span></code> nên cẩn thận vì nó có thể dẫn đến hành vi không mong muốn nếu luồng đã thực hiện một số tác vụ nhất định, như đang giữ tài nguyên hoặc đang ở giữa hoạt động quan trọng. Thay vì hủy luồng đột ngột, khuyến khích sử dụng tín hiệu để yêu cầu luồng tự kết thúc theo cách hợp lý. Điều này cho phép luồng dọn dẹp tài nguyên, hoàn thành các tác vụ đang dang dở và chấm dứt một cách sạch sẽ.</p>
+<p>Giống với Thread Termination, kernel cũng không thể thu hồi lại các tài nguyên mà Thread đó sử dụng.</p>
+</section>
+<section id="thread-suspension">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">Thread Suspension</a><a class="headerlink" href="#thread-suspension" title="Link to this heading"></a></h3>
+<p>Một luồng có thể bị ngăn không cho thực thi trong một khoảng thời gian vô hạn nếu luồng bị suspended. Hàm <code class="docutils literal notranslate"><span class="pre">k_thread_suspend()</span></code> có thể được sử dụng để tạm dừng bất kỳ luồng nào, bao gồm cả luồng đang gọi. Tạm dừng một luồng đã tạm dừng thì không có tác dụng gì.</p>
+<p>Sau khi bị tạm dừng, luồng đó không thể được lên lịch cho đến khi một luồng khác gọi <code class="docutils literal notranslate"><span class="pre">k_thread_resume()</span></code> để xóa việc tạm dừng.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Một luồng có thể ngăn chính nó thực thi trong một khoảng thời gian nhất định bằng cách sử dụng <code class="docutils literal notranslate"><span class="pre">k_sleep()</span></code>. Tuy nhiên, điều này khác với việc tạm dừng một luồng vì một luồng sử dụng <code class="docutils literal notranslate"><span class="pre">k_sleep()</span></code> sẽ tự động được thực thi khi đạt đến giới hạn thời gian.</p>
+</div>
+</section>
+<section id="thread-state">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">Thread State</a><a class="headerlink" href="#thread-state" title="Link to this heading"></a></h3>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../../index.html" class="btn btn-neutral float-left" title="HOME" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../Modbus/index.html" class="btn btn-neutral float-right" title="Test" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, QuocThang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
