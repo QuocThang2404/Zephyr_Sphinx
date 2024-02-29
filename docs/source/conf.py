@@ -6,10 +6,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Coding with kids'
-copyright = '2024, Thang'
-author = 'Thang'
-release = '0.1'
+project = 'Zephyr_Sphinx'
+copyright = '2024, QuocThang'
+author = 'QuocThang'
+release = 'v1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
