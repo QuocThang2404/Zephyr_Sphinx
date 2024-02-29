@@ -53,6 +53,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#thread-aborting">Thread Aborting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#thread-suspension">Thread Suspension</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#thread-state">Thread State</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#thread-stack-objects">Thread Stack Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#kernel-only-stacks">Kernel-only Stacks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#thread-stacks">Thread Stacks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#thread-priorities">Thread Priorities</a></li>
 </ul>
 </li>
 </ul>
@@ -96,6 +102,8 @@
 <li><p><a class="reference internal" href="#thread-aborting" id="id5">Thread Aborting</a></p></li>
 <li><p><a class="reference internal" href="#thread-suspension" id="id6">Thread Suspension</a></p></li>
 <li><p><a class="reference internal" href="#thread-state" id="id7">Thread State</a></p></li>
+<li><p><a class="reference internal" href="#thread-stack-objects" id="id8">Thread Stack Objects</a></p></li>
+<li><p><a class="reference internal" href="#thread-priorities" id="id9">Thread Priorities</a></p></li>
 </ul>
 </li>
 </ul>
@@ -165,6 +173,91 @@ Có 2 hai cách khởi động một luồng (thread) trong Zephyr:</p>
 </section>
 <section id="thread-state">
 <h3><a class="toc-backref" href="#id7" role="doc-backlink">Thread State</a><a class="headerlink" href="#thread-state" title="Link to this heading"></a></h3>
+<p>Một luồng không có yếu tố ngăn cản việc thực thi nó được coi là <strong>sẵn sàng (ready)</strong> và đủ điều kiện để được chọn làm <strong>luồng hiện tại</strong>.</p>
+<p>Một luồng có một hoặc nhiều yếu tố ngăn cản việc thực thi nó được coi là <strong>chưa sẵn sàng (unready)</strong> và không thể được chọn làm luồng hiện tại.</p>
+<p>Các yếu tố sau làm cho luồng chưa sẵn sàng:</p>
+<ul class="simple">
+<li><p>Luồng chưa được bắt đầu.</p></li>
+<li><p>Thread đang chờ kernel thưc hiện xong một hoạt động.</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>Khi một luồng yêu cầu sử dụng một kernel object (ví dụ như lấy một semaphore), nhưng đối tượng đó chưa sẵn sàng (ví dụ như semaphore đã được chiếm bởi một luồng khác), luồng sẽ bị chặn và chờ đợi cho đến khi thao tác trên đối tượng hoàn thành.</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p>Luồng đang chờ thời gian để thực thi (hết thời gian chờ).</p></li>
+<li><p>Luồng bị chặn (suspended).</p></li>
+<li><p>Luồng bị chấm dứt (terminated) hoặc hủy bỏ (aborted).</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Sơ đồ có thể khiến bạn nghĩ <code class="docutils literal notranslate"><span class="pre">ready</span></code> và <code class="docutils literal notranslate"><span class="pre">run</span></code> là hai trạng thái luồng riêng biệt. Thực ra <code class="docutils literal notranslate"><span class="pre">ready</span></code> là một trạng thái thực sự của luồng, cho biết nó đã được kích hoạt và đủ điều kiện để chạy. <code class="docutils literal notranslate"><span class="pre">Run</span></code> không phải là trạng thái luồng, mà là <strong>trạng thái lịch trình</strong>. Trạng thái lịch trình cho biết liệu một luồng có đang được hệ thống thực thi hay không.</p>
+</div>
+</section>
+<section id="thread-stack-objects">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">Thread Stack Objects</a><a class="headerlink" href="#thread-stack-objects" title="Link to this heading"></a></h3>
+<p>Mỗi luồng đều có một stack riêng biệt để CPU lưu trữ context (các trạng thái, biến, dữ liệu) của luồng. Tùy thuộc vào cấu hình sẽ có một số yêu cầu ràng buộc:</p>
+<ul class="simple">
+<li><p>Có thể cần có dự trữ bộ nhớ bổ sung dành riêng cho cấu trúc quản lý bộ nhớ.</p></li>
+<li><p>Nếu hệ thống bật chức năng “phát hiện tràn stack ở vùng bảo vệ”, bắt buộc phải có một vùng nhỏ bảo vệ ghi ngay trước vùng đệm stack của mỗi luồng. Nếu luồng cố gắng ghi dữ liệu vào vùng này, nó sẽ gặp lỗi truy cập vi phạm, cho biết stack đã bị tràn.</p></li>
+<li><p>Nếu kích hoạt userspace trong Zephyr thì yêu cầu một stack riêng cố định cho việc xử lý system call. Khi chương trình thực hiện system call, nó sẽ chuyển sang chế độ đặc quyền (privileged mode) và thực hiện một lệnh đặc biệt (special instruction) để yêu cầu dịch vụ từ kernel.</p></li>
+<li><p>Nếu userspace được bật, bộ đệm thread’s stack phải có kích thước phù hợp và được căn chỉnh sao cho vùng bộ nhớ bảo vệ vừa khớp hoàn toàn với vùng stack.</p></li>
+</ul>
+<p>Các ràng buộc căn chỉnh có thể khá hạn chế, ví dụ: MPU có thể yêu cầu các vùng có kích thước là lũy thừa của 2 (4, 8, 16 byte).</p>
+<section id="kernel-only-stacks">
+<h4>Kernel-only Stacks<a class="headerlink" href="#kernel-only-stacks" title="Link to this heading"></a></h4>
+<p>Nếu ta biết trước thread chỉ chạy trong chế độ kernel, hoặc stack đang được sử dụng cho các bối cảnh đặc biệt như xử lý ngắt thì nên sử dụng các macro <code class="docutils literal notranslate"><span class="pre">K_KERNEL_STACK</span></code> để khai báo stack.</p>
+<p>Các stack này tiết kiệm bộ nhớ vì vùng MPU sẽ không bao giờ cần được lập trình để bảo vệ chính bộ đệm của stack và kernel sẽ không cần dự trữ thêm chỗ cho privileged elevation stack hoặc cấu trúc dữ liệu quản lý bộ nhớ vì 2 phần đó chỉ liên quan đến các luồng ở chế độ người dùng.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Macro <code class="docutils literal notranslate"><span class="pre">K_KERNEL_STACK</span></code> tối ưu hóa việc sử dụng bộ nhớ bằng cách:</p>
+<ul class="simple">
+<li><p>Không cần cấu hình vùng MPU (Memory Protection Unit) cho stack: MPU tự động quản lý quyền truy cập cho kernel’s stack, loại bỏ nhu cầu cấu hình thủ công.</p></li>
+<li><p>Không cần privileged elevation stack: Kernel’s stack đã có các tính năng cần thiết để xử lý các tác vụ đặc quyền nên không cần thêm stack riêng.</p></li>
+<li><p>Không cần dữ liệu quản lý bộ nhớ riêng: Kernel’s stack sử dụng chung cấu trúc dữ liệu quản lý bộ nhớ với các stack khác, dẫn đến tiết kiệm bộ nhớ.</p></li>
+</ul>
+</div>
+<p>Bất kỳ nỗ lực truy cập kernel’s stack từ chế độ người dùng sẽ dẫn đến lỗi nghiêm trọng.</p>
+<p>Nếu <code class="docutils literal notranslate"><span class="pre">CONFIG_USERSPACE</span></code> không được kích hoạt, tập hợp các macro <code class="docutils literal notranslate"><span class="pre">K_THREAD_STACK</span></code> sẽ có tác dụng giống hệt với macro <code class="docutils literal notranslate"><span class="pre">K_KERNEL_STACK</span></code>.</p>
+</section>
+<section id="thread-stacks">
+<h4>Thread Stacks<a class="headerlink" href="#thread-stacks" title="Link to this heading"></a></h4>
+<p>Nếu biết rằng stack sẽ cần lưu trữ các luồng của người dùng hoặc nếu không thể xác định được điều này, hãy xác định stack bằng macro K_THREAD_STACK. Điều này có thể sử dụng nhiều bộ nhớ hơn nhưng stack object sẽ phù hợp để lưu trữ các luồng của người dùng.</p>
+<p>Nếu <code class="docutils literal notranslate"><span class="pre">CONFIG_USERSPACE</span></code> không được kích hoạt, tập hợp các macro <code class="docutils literal notranslate"><span class="pre">K_THREAD_STACK</span></code> sẽ có tác dụng giống hệt với macro <code class="docutils literal notranslate"><span class="pre">K_KERNEL_STACK</span></code>.</p>
+</section>
+</section>
+<section id="thread-priorities">
+<h3><a class="toc-backref" href="#id9" role="doc-backlink">Thread Priorities</a><a class="headerlink" href="#thread-priorities" title="Link to this heading"></a></h3>
+<p>Mức ưu tiên của luồng là một giá trị số nguyên, có thể là âm hoặc không âm. Số nguyên càng thấp thì mức ưu tiên càng cao. Nói cách khác, luồng có giá trị ưu tiên thấp hơn sẽ được hệ điều hành xử lý trước các luồng có giá trị ưu tiên cao hơn.
+Ví dụ
+- Thread A có mức ưu tiên là 4
+- Thread B có mức ưu tiên là 7
+- Thread C có mức ưu tiên là -2</p>
+<p>Vậy mức ưu tiên sẽ như sau: C &gt; A &gt; B</p>
+<p>Scheduler phân biệt giữa hai loại luồng, dựa trên mức độ ưu tiên của từng luồng.</p>
+<ul class="simple">
+<li><p>Cooperative thread: Có mức ưu tiên âm. Một khi trở thành luồng đang chạy, nó sẽ duy trì trạng thái đó cho đến khi tự thực hiện hành động khiến nó không sẵn sàng chạy tiếp (ví dụ như chờ đợi tài nguyên, kết thúc tác vụ).</p></li>
+<li><p>Preemptive thread: Có mức ưu tiên không âm. Một khi trở thành luồng đang chạy, nó có thể bị hệ điều hành tạm dừng bất cứ lúc nào nếu:</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>Một luồng cooperative chuyển sang trạng thái sẵn sàng chạy.</p></li>
+<li><p>Một luồng khác chiếm quyền với mức ưu tiên cao hơn hoặc bằng nó chuyển sang trạng thái sẵn sàng chạy.</p></li>
+</ul>
+</div></blockquote>
+<p>Mức ưu tiên ban đầu của một luồng có thể được thay đổi lên (tăng quyền ưu tiên) hoặc xuống (giảm quyền ưu tiên) sau khi luồng đó đã được khởi chạy.</p>
+<p>Điều này có nghĩa là preemptive thread có thể trở thành cooperative thread nếu chuyển mức ưu tiên xuống âm, và ngược lại.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Scheduler không tự động thay đổi mức ưu tiên của luồng dựa trên suy đoán mà chỉ thay đổi mức ưu tiên theo yêu cầu của ứng dụng.</p>
+</div>
+<p>Kernel hỗ trợ số lượng mức ưu tiên gần như không giới hạn. Điều này cho phép linh hoạt cao trong việc thiết lập mức ưu tiên phù hợp cho từng luồng. Hai tùy chọn cấu hình <code class="docutils literal notranslate"><span class="pre">CONFIG_NUM_COOP_PRIORITIES</span></code>  và <code class="docutils literal notranslate"><span class="pre">CONFIG_NUM_PREEMPT_PRIORITIES</span></code> xác định số mức ưu tiên cho mỗi loại luồng:</p>
+<ul class="simple">
+<li><p>Cooperative threads: (- <code class="docutils literal notranslate"><span class="pre">CONFIG_NUM_COOP_PRIORITIES</span></code>) to -1</p></li>
+<li><p>Preemptive threads: 0 to (<code class="docutils literal notranslate"><span class="pre">CONFIG_NUM_PREEMPT_PRIORITIES</span></code> - 1)</p></li>
+</ul>
+<p>Ví dụ: cấu hình 5 mức độ ưu tiên cho cooperative và 10 mức độ ưu tiên preemptive sẽ có kết quả lần lượt là trong phạm vi từ -5 đến -1 và 0 đến 9.</p>
 </section>
 </section>
 </section>
