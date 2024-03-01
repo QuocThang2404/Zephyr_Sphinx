@@ -110,6 +110,8 @@ Các yếu tố sau làm cho luồng chưa sẵn sàng:
 
 .. image:: img/Thread_States.svg
     :align: center
+   
+   
 
 .. note:: 
     Sơ đồ có thể khiến bạn nghĩ ``ready`` và ``run`` là hai trạng thái luồng riêng biệt. Thực ra ``ready`` là một trạng thái thực sự của luồng, cho biết nó đã được kích hoạt và đủ điều kiện để chạy. ``Run`` không phải là trạng thái luồng, mà là **trạng thái lịch trình**. Trạng thái lịch trình cho biết liệu một luồng có đang được hệ thống thực thi hay không.

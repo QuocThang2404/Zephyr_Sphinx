@@ -45,7 +45,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Kernel/Thread/index.html">Thread</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">MODBUS</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MODBUS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#modbus-protocol">Modbus Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cac-lop-trong-giao-thuc-modbus">Các lớp trong giao thức Modbus</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -74,6 +78,24 @@
              
   <section id="modbus">
 <h1>MODBUS<a class="headerlink" href="#modbus" title="Permalink to this heading"></a></h1>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#modbus-protocol" id="id1">Modbus Protocol</a></p></li>
+<li><p><a class="reference internal" href="#cac-lop-trong-giao-thuc-modbus" id="id2">Các lớp trong giao thức Modbus</a></p></li>
+</ul>
+</nav>
+<section id="modbus-protocol">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Modbus Protocol</a><a class="headerlink" href="#modbus-protocol" title="Permalink to this heading"></a></h2>
+<p>Giao thức Modbus là giao thức yêu cầu-phản hồi được triển khai bằng cách sử dụng mối quan hệ master - slave. Trong mối quan hệ này, giao tiếp luôn diễn ra theo cặp, với thiết bị master khởi tạo yêu cầu và sau đó chờ đợi phản hồi từ thiết bị slave. Thiết bị master sẽ chịu trách nhiệm bắt đầu mọi tương tác.</p>
+<ul class="simple">
+<li><p><strong>Thiết bị Master</strong>: Thường là human machine interface (HMI) hoặc hệ thống Supervisory Control and Data Acquisition (SCADA). Chúng sử dụng Modbus để đọc dữ liệu hoặc gửi lệnh cho các thiết bị Slave.</p></li>
+<li><p><strong>Thiết bị Slave:</strong> Là các thiết bị như cảm biến, PLC (bộ điều khiển logic lập trình) hoặc PAC (bộ điều khiển tự động lập trình). Chúng thu thập dữ liệu hoặc thực hiện các hành động dựa trên yêu cầu của thiết bị Master.</p></li>
+</ul>
+<img alt="../_images/Modbus-Network.png" class="align-center" src="../_images/Modbus-Network.png" />
+</section>
+<section id="cac-lop-trong-giao-thuc-modbus">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Các lớp trong giao thức Modbus</a><a class="headerlink" href="#cac-lop-trong-giao-thuc-modbus" title="Permalink to this heading"></a></h2>
+</section>
 </section>
 
 
